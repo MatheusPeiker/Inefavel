@@ -20,9 +20,12 @@ const Header: React.FC = () => {
             <a className="text-sm font-medium text-text-muted hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full" href="#sobre">Sobre</a>
             <a className="text-sm font-medium text-text-muted hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full" href="#contato">Contato</a>
           </nav>
-          <button className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold tracking-wide hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+          <a
+            href="#contato"
+            className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-full h-11 px-6 bg-primary text-white text-sm font-bold tracking-wide hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 text-center"
+          >
             Agendar Curadoria
-          </button>
+          </a>
         </div>
       </div>
     </header>
