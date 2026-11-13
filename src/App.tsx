@@ -17,7 +17,7 @@ const TITLES: Record<string, string> = {
   estoque: 'Estoque',
   favoritos: 'Favoritos',
   comparar: 'Comparar carros',
-  vender: 'Vender meu carro',
+  vender: 'Avaliar meu carro',
   admin: 'Área do lojista',
 };
 

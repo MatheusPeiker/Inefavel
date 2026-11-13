@@ -6,7 +6,7 @@ export const money = (v: number) => brl.format(Math.round(v));
 export const moneyCents = (v: number) => brlCents.format(v);
 export const num = (v: number) => int.format(Math.round(v));
 export const kmLabel = (v: number) => (v === 0 ? '0 km' : `${num(v)} km`);
-export const years = (fab: number, model: number) => `${fab}/${model}`;
+export const years = (fab: number, model: number) => (fab === model ? String(model) : `${fab}/${model}`);
 export const digits = (s: string) => s.replace(/\D+/g, '');
 
 /** Formata 5511999999999 como +55 (11) 99999-9999. */

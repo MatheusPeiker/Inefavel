@@ -9,7 +9,7 @@ import { WhatsAppIcon } from './ui';
 const NAV: { label: string; to: Route }[] = [
   { label: 'Início', to: { name: 'home' } },
   { label: 'Estoque', to: { name: 'estoque' } },
-  { label: 'Vender meu carro', to: { name: 'vender' } },
+  { label: 'Avaliar meu carro', to: { name: 'vender' } },
 ];
 
 export function Header({ route }: { route: Route }) {

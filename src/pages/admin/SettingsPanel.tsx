@@ -103,26 +103,26 @@ export function SettingsPanel() {
           </p>
         </div>
         <div className="card p-5">
-          <p className="font-display text-[16px] font-extrabold italic">{mode === 'supabase' ? 'Importar exemplos' : 'Recomeçar a demonstração'}</p>
+          <p className="font-display text-[16px] font-extrabold italic">{mode === 'supabase' ? 'Importar estoque inicial' : 'Voltar ao estoque inicial'}</p>
           <p className="mt-2 text-[14px] text-muted">
-            {mode === 'supabase' ? 'Adiciona os 16 carros de exemplo ao banco, sem apagar os seus.' : 'Volta o estoque para os 16 carros de exemplo. Carros e fotos adicionados aqui serão apagados.'}
+            {mode === 'supabase' ? 'Adiciona o Fiat Pulse que veio com o site ao banco, sem apagar os seus.' : 'Volta o estoque para o Fiat Pulse que veio com o site. Carros e fotos adicionados aqui serão apagados.'}
           </p>
           <button className="btn btn-outline btn-sm mt-4" onClick={() => setConfirm(true)}>
-            <RotateCcw size={15} /> {mode === 'supabase' ? 'Importar exemplos' : 'Restaurar exemplos'}
+            <RotateCcw size={15} /> {mode === 'supabase' ? 'Importar' : 'Restaurar'}
           </button>
         </div>
       </div>
 
       <ConfirmDialog
         open={confirm}
-        title={mode === 'supabase' ? 'Importar carros de exemplo' : 'Restaurar estoque de exemplo'}
-        message={mode === 'supabase' ? 'Os carros de exemplo serão adicionados ao banco de dados.' : 'Todos os carros cadastrados neste navegador serão substituídos pelos exemplos.'}
+        title={mode === 'supabase' ? 'Importar estoque inicial' : 'Voltar ao estoque inicial'}
+        message={mode === 'supabase' ? 'O Fiat Pulse será adicionado ao banco de dados.' : 'Todos os carros cadastrados neste navegador serão substituídos pelo estoque inicial.'}
         confirmLabel={mode === 'supabase' ? 'Importar' : 'Restaurar'}
         onClose={() => setConfirm(false)}
         onConfirm={async () => {
           try {
             await resetDemo();
-            toast('Estoque de exemplo carregado');
+            toast('Estoque inicial restaurado');
           } catch (e) {
             toast((e as Error).message, { tone: 'error' });
           }

@@ -1,5 +1,5 @@
 import type { Car, StoreSettings } from './types';
-import { defaultSettings, seedCars } from './seed';
+import { BUNDLED_PHOTOS, defaultSettings, seedCars } from './seed';
 import { session, storage } from './storage';
 import { blobToDataUrl } from './image';
 
@@ -23,11 +23,21 @@ export interface Repository {
   isSignedIn(): Promise<boolean>;
 }
 
-const K = { cars: 'passos.v1.cars', settings: 'passos.v1.settings', auth: 'passos.v1.admin' };
+const K = { cars: 'passos.v2.cars', settings: 'passos.v2.settings', auth: 'passos.v1.admin' };
+
+// As fotos que vêm com o app são guardadas como "@foto:N" para não lotar o armazenamento do navegador.
+const TOKEN = '@foto:';
+const pack = (cars: Car[]) =>
+  cars.map((c) => ({ ...c, photos: c.photos.map((p) => (BUNDLED_PHOTOS.includes(p) ? TOKEN + BUNDLED_PHOTOS.indexOf(p) : p)) }));
+const unpack = (cars: Car[]) =>
+  cars.map((c) => ({ ...c, photos: c.photos.map((p) => (p.startsWith(TOKEN) ? BUNDLED_PHOTOS[Number(p.slice(TOKEN.length))] ?? '' : p)).filter(Boolean) }));
 const ADMIN_PIN = (import.meta.env.VITE_ADMIN_PIN as string | undefined) || '1234';
 
 function createLocalRepo(): Repository {
-  const read = () => storage.get<Car[] | null>(K.cars, null) ?? seedCars;
+  const read = () => {
+    const raw = storage.get<Car[] | null>(K.cars, null);
+    return raw ? unpack(raw) : seedCars.map((c) => ({ ...c }));
+  };
   return {
     kind: 'local',
     async listCars() {
@@ -39,11 +49,11 @@ function createLocalRepo(): Repository {
       const next = { ...car, updatedAt: new Date().toISOString() };
       if (i >= 0) all[i] = next;
       else all.unshift(next);
-      storage.set(K.cars, all);
+      storage.set(K.cars, pack(all));
       return next;
     },
     async deleteCar(id) {
-      storage.set(K.cars, read().filter((c) => c.id !== id));
+      storage.set(K.cars, pack(read().filter((c) => c.id !== id)));
     },
     async getSettings() {
       return { ...defaultSettings, ...storage.get<Partial<StoreSettings>>(K.settings, {}) };

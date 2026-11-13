@@ -81,13 +81,13 @@ export function Stock() {
           ) : (
             <div className="grid place-items-center rounded-[22px] border-2 border-dashed border-line px-6 py-16 text-center">
               <p className="font-display text-[22px] font-black italic uppercase">Nenhum carro com esses filtros</p>
-              <p className="mt-2 max-w-md text-muted">Tente ampliar a faixa de preço ou remover alguma marca. Se não encontrar, a gente procura para você.</p>
+              <p className="mt-2 max-w-md text-muted">Tente ampliar a faixa de preço ou remover algum filtro. Ou conte para a gente o que você procura.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 <button className="btn btn-outline" onClick={() => setFilters({ ...emptyFilters, sort: filters.sort })}>
                   Limpar filtros
                 </button>
                 <a className="btn btn-primary" target="_blank" rel="noopener noreferrer" href={waLink(settings.whatsapp, `${genericText(settings)} Estou procurando um carro que não encontrei no site.`)}>
-                  <WhatsAppIcon size={18} /> Encomendar um carro
+                  <WhatsAppIcon size={18} /> Falar no WhatsApp
                 </a>
               </div>
             </div>

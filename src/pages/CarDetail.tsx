@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { BadgeCheck, CalendarDays, Check, ChevronLeft, ChevronRight, Fuel, Gauge, Heart, Link2, Palette, Scale, Settings2, Car as CarIcon, DoorOpen, Hash } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BadgeCheck, CalendarDays, MapPin, Check, ChevronLeft, ChevronRight, Expand, Fuel, Gauge, Heart, Link2, Palette, Scale, Settings2, Car as CarIcon, DoorOpen, Hash, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useStore } from '../lib/store';
 import { PROVENANCE, STATUS_LABEL, type Car } from '../lib/types';
 import { fromInstallment, kmLabel, money, years } from '../lib/format';
@@ -17,6 +18,7 @@ export function CarDetail({ id }: { id: string }) {
   const toast = useToast();
   const car = cars.find((c) => c.id === id && c.status !== 'vendido');
   const [photo, setPhoto] = useState(0);
+  const [zoom, setZoom] = useState(false);
   useEffect(() => setPhoto(0), [id]);
 
   const similar = useMemo(() => {
@@ -62,7 +64,7 @@ export function CarDetail({ id }: { id: string }) {
       </span>,
     ],
     [DoorOpen, 'Portas', String(car.doors)],
-    [Hash, 'Final da placa', car.plateEnd || '—'],
+    car.plateEnd ? [Hash, 'Final da placa', car.plateEnd] : [MapPin, 'Localização', settings.city.replace(' · ', '-')],
   ];
 
   return (
@@ -80,7 +82,14 @@ export function CarDetail({ id }: { id: string }) {
       <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,1fr)]">
         <div className="min-w-0">
           <div className="relative overflow-hidden rounded-[26px] shadow-card">
-            <CarMedia car={car} index={photo} eager className="aspect-[16/10] w-full" />
+            <CarMedia car={car} index={photo} eager className={`w-full ${nPhotos ? 'aspect-[4/3]' : 'aspect-[16/10]'}`} />
+            {nPhotos > 0 && (
+              <button className="absolute inset-0 cursor-zoom-in" aria-label="Ver fotos em tela cheia" onClick={() => setZoom(true)}>
+                <span className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-black/55 text-white">
+                  <Expand size={18} />
+                </span>
+              </button>
+            )}
             {nPhotos > 1 && (
               <>
                 <button className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-surface/90 shadow" aria-label="Foto anterior" onClick={() => setPhoto((p) => (p - 1 + nPhotos) % nPhotos)}>
@@ -139,7 +148,7 @@ export function CarDetail({ id }: { id: string }) {
           {options.length > 0 && (
             <section className="mt-8" aria-labelledby="opcionais">
               <h2 id="opcionais" className="eyebrow mb-3 text-muted">
-                Opcionais
+                Itens e equipamentos
               </h2>
               <ul className="grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
                 {options.map((o) => (
@@ -223,6 +232,10 @@ export function CarDetail({ id }: { id: string }) {
         </aside>
       </div>
 
+      {zoom && nPhotos > 0 && (
+        <Lightbox photos={car.photos} index={photo} onIndex={setPhoto} onClose={() => setZoom(false)} title={`${car.brand} ${car.model}`} />
+      )}
+
       {similar.length > 0 && (
         <section className="pt-16" aria-labelledby="parecidos">
           <p className="tagline text-[13px] text-brand-text">você também pode gostar</p>
@@ -237,5 +250,69 @@ export function CarDetail({ id }: { id: string }) {
         </section>
       )}
     </div>
+  );
+}
+
+function Lightbox({ photos, index, onIndex, onClose, title }: { photos: string[]; index: number; onIndex: (i: number) => void; onClose: () => void; title: string }) {
+  const n = photos.length;
+  const go = (d: number) => onIndex((index + d + n) % n);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') onIndex((index + 1) % n);
+      if (e.key === 'ArrowLeft') onIndex((index - 1 + n) % n);
+    };
+    window.addEventListener('keydown', onKey);
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.documentElement.style.overflow = '';
+    };
+  }, [index, n, onClose, onIndex]);
+  const startX = useRef(0);
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Fotos do ${title}`}
+      className="fixed inset-0 z-[75] flex flex-col bg-[#0e0e0e] text-white"
+      style={{ padding: 'env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px)' }}
+      onTouchStart={(e) => (startX.current = e.touches[0].clientX)}
+      onTouchEnd={(e) => {
+        const dx = e.changedTouches[0].clientX - startX.current;
+        if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+      }}
+    >
+      <div className="flex items-center gap-3 px-4 py-3">
+        <p className="min-w-0 flex-1 truncate font-display font-extrabold italic">{title}</p>
+        <span className="text-[13px] text-white/70 tnum">
+          {index + 1}/{n}
+        </span>
+        <button className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Fechar" onClick={onClose} autoFocus>
+          <X size={22} />
+        </button>
+      </div>
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-2">
+        <img src={photos[index]} alt={`${title}, foto ${index + 1}`} className="max-h-full max-w-full rounded-lg object-contain" />
+        {n > 1 && (
+          <>
+            <button className="absolute left-3 grid h-12 w-12 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Foto anterior" onClick={() => go(-1)}>
+              <ChevronLeft size={26} />
+            </button>
+            <button className="absolute right-3 grid h-12 w-12 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Próxima foto" onClick={() => go(1)}>
+              <ChevronRight size={26} />
+            </button>
+          </>
+        )}
+      </div>
+      <div className="flex justify-center gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
+        {photos.map((p, i) => (
+          <button key={i} onClick={() => onIndex(i)} aria-label={`Foto ${i + 1}`} className={`h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 ${i === index ? 'border-brand' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+            <img src={p} alt="" className="h-full w-full object-cover" />
+          </button>
+        ))}
+      </div>
+    </div>,
+    document.body,
   );
 }

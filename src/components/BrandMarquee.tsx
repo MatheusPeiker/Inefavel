@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { BrandMark } from './BrandMark';
+import { Logo } from './Logo';
 
 interface Brand {
   name: string;
@@ -13,7 +14,12 @@ export function BrandMarquee({ brands, onPick, reverse }: { brands: Brand[]; onP
   const reps = Math.max(1, Math.ceil(12 / brands.length));
   const group = Array.from({ length: reps }, () => brands).flat();
   const style = { '--duration': `${group.length * 3.4}s` } as CSSProperties;
-  const item = (b: Brand, i: number, hidden: boolean) => (
+  const sep = (i: number) => (
+    <li key={`sep-${i}`} aria-hidden="true" className="flex items-center px-1">
+      <Logo variant="outline" className="h-6 w-auto opacity-60" title="" />
+    </li>
+  );
+  const item = (b: Brand, i: number, hidden: boolean) => [
     <li key={`${b.name}-${i}`}>
       <button
         type="button"
@@ -30,8 +36,9 @@ export function BrandMarquee({ brands, onPick, reverse }: { brands: Brand[]; onP
           </span>
         </span>
       </button>
-    </li>
-  );
+    </li>,
+    sep(i),
+  ];
   return (
     <div className="marquee" data-reverse={reverse ? 'true' : 'false'} style={style}>
       <ul className="marquee-track">{group.map((b, i) => item(b, i, false))}</ul>

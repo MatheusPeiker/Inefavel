@@ -17,7 +17,7 @@ export function Footer() {
         <div className="min-w-0">
           <Logo className="h-12 w-auto" ink="#ffffff" />
           <p className="mt-5 max-w-sm text-[15px] text-ink-muted">
-            Seminovos com procedência, avaliação justa do seu usado e financiamento facilitado. Atendimento direto pelo WhatsApp.
+            Seminovos em {settings.city.replace(' · ', '-')}. Financiamento facilitado e seu usado na troca, mediante avaliação. Atendimento direto pelo WhatsApp.
           </p>
           <a href={waLink(settings.whatsapp, genericText(settings))} target="_blank" rel="noopener noreferrer" className="btn btn-primary mt-6">
             <WhatsAppIcon size={18} /> Chamar no WhatsApp
@@ -28,15 +28,21 @@ export function Footer() {
           <p className="flex gap-3">
             <MapPin size={18} className="mt-0.5 shrink-0 text-ink-muted" />
             <span>
-              {settings.address}
-              <br />
-              <span className="text-ink-muted">{settings.city}</span>
+              {settings.address && (
+                <>
+                  {settings.address}
+                  <br />
+                </>
+              )}
+              <span className={settings.address ? 'text-ink-muted' : ''}>{settings.city}</span>
             </span>
           </p>
-          <p className="flex gap-3">
-            <Clock size={18} className="mt-0.5 shrink-0 text-ink-muted" />
-            <span>{settings.hours}</span>
-          </p>
+          {settings.hours && (
+            <p className="flex gap-3">
+              <Clock size={18} className="mt-0.5 shrink-0 text-ink-muted" />
+              <span>{settings.hours}</span>
+            </p>
+          )}
         </div>
         <div className="grid content-start gap-4 text-[15px]">
           <p className="eyebrow text-brand">Contato</p>

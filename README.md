@@ -19,14 +19,14 @@ cp .env.example .env.local   # ajuste o número do WhatsApp
 npm run dev                  # http://localhost:3000
 ```
 
-Sem as variáveis do Supabase o app roda em **modo demonstração**: o estoque começa com carros de exemplo e as alterações do admin ficam salvas no navegador. PIN do admin: `VITE_ADMIN_PIN` (padrão `1234`).
+Sem as variáveis do Supabase o app roda em **modo demonstração**: o estoque começa com o Fiat Pulse Audace 2022 (fotos em `src/assets/cars/`) e as alterações do admin ficam salvas no navegador. PIN do admin: `VITE_ADMIN_PIN` (padrão `1234`).
 
 ## Supabase (banco, fotos e login)
 
 1. Crie um projeto no Supabase e rode `supabase/schema.sql` no SQL Editor.
 2. Em **Authentication > Providers**, desative novos cadastros. Crie o usuário da loja em **Authentication > Users**.
 3. Preencha `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
-4. Entre em `/admin` com e-mail e senha. Em **Configurações** dá para importar os carros de exemplo.
+4. Entre em `/admin` com e-mail e senha. Em **Configurações** dá para importar o estoque inicial (Fiat Pulse).
 
 A troca é automática: com as duas variáveis definidas, o app usa o Supabase (`src/lib/supabase-repo.ts`); sem elas, usa o navegador (`src/lib/repository.ts`).
 
@@ -40,7 +40,7 @@ Importe o repositório; o `vercel.json` já define build e as regras de rota. Ca
 npm run build:artifact   # gera dist-artifact/passos-automoveis.html
 ```
 
-Gera um HTML único, com rotas por `#` (ex.: `#carro-pa1042`, `#admin`), para compartilhar e revisar sem servidor.
+Gera um HTML único, com rotas por `#` (ex.: `#carro-fiat-pulse-audace-2022`, `#admin`), para compartilhar e revisar sem servidor.
 
 ## Estrutura
 

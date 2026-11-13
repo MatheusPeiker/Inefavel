@@ -71,7 +71,7 @@ export function createSupabaseRepo(url: string, key: string): Repository {
       return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
     },
     async resetDemo() {
-      // Importa o estoque de exemplo (não apaga carros já cadastrados).
+      // Importa o estoque inicial (não apaga carros já cadastrados).
       const { error } = await sb.from('cars').upsert(seedCars.map(toRow));
       fail(error);
       return this.listCars();

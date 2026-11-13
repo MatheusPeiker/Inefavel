@@ -8,18 +8,20 @@ import { WhatsAppIcon } from '../components/ui';
 const STEPS = [
   ['Conte sobre o carro', 'Marca, modelo, ano e quilometragem. Leva menos de um minuto.'],
   ['Envie as fotos no WhatsApp', 'A conversa já abre com os dados preenchidos. É só anexar as fotos.'],
-  ['Receba a proposta', 'Avaliamos e respondemos com o valor para venda ou para usar na troca.'],
+  ['Receba a avaliação', 'A equipe avalia e responde pelo WhatsApp com a proposta para a troca.'],
 ];
 
 export function Sell() {
   const { settings } = useStore();
-  const [f, setF] = useState({ brand: '', model: '', year: '', km: '', intent: 'Vender', name: '', notes: '' });
+  const [f, setF] = useState({ brand: '', model: '', year: '', km: '', intent: 'Trocar', name: '', notes: '' });
   const [touched, setTouched] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const missing = { brand: !f.brand.trim(), model: !f.model.trim(), year: !/^\d{4}$/.test(f.year), name: !f.name.trim() };
   const valid = !Object.values(missing).some(Boolean);
   const text = [
-    `Olá, ${settings.storeName}! Quero ${f.intent.toLowerCase()} meu carro.`,
+    f.intent === 'Trocar'
+      ? `Olá, ${settings.storeName}! Quero dar meu carro na troca. Podem avaliar?`
+      : `Olá, ${settings.storeName}! Vocês têm interesse em avaliar meu carro para compra?`,
     `*${f.brand} ${f.model}* ${f.year}`,
     f.km ? `Quilometragem: ${num(Number(digits(f.km)))} km` : '',
     f.notes ? `Observações: ${f.notes}` : '',
@@ -32,10 +34,10 @@ export function Sell() {
     <div className="wrap pt-8">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
         <div>
-          <p className="tagline text-[13px] text-brand-text">vender ou trocar</p>
+          <p className="tagline text-[13px] text-brand-text">seu usado na troca</p>
           <h1 className="display text-[clamp(2.2rem,5vw,3.6rem)]">Avalie seu carro com a Passos</h1>
           <p className="mt-4 max-w-lg text-[16px] text-muted">
-            Compramos seu carro à vista ou usamos o valor como entrada em um carro do nosso estoque. A avaliação é feita pelo WhatsApp e não tem custo.
+            Aceitamos seu usado na troca, mediante avaliação. Preencha os dados e a conversa continua pelo WhatsApp.
           </p>
           <ol className="mt-8 grid gap-5">
             {STEPS.map(([t, d], i) => (
@@ -54,9 +56,9 @@ export function Sell() {
           <fieldset className="sm:col-span-2">
             <legend className="field-label">O que você quer fazer?</legend>
             <div className="grid grid-cols-2 gap-2">
-              {['Vender', 'Trocar'].map((o) => (
+              {['Trocar', 'Vender'].map((o) => (
                 <button type="button" key={o} className="chip h-11 justify-center text-[14px]" aria-pressed={f.intent === o} onClick={() => setF({ ...f, intent: o })}>
-                  {o === 'Vender' ? 'Vender meu carro' : 'Trocar por outro'}
+                  {o === 'Vender' ? 'Quero vender' : 'Dar na troca'}
                 </button>
               ))}
             </div>

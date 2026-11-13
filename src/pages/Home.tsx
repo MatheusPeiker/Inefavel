@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ChevronLeft, ChevronRight, Landmark, MessageCircle, Repeat2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CalendarCheck, Check, ChevronLeft, ChevronRight, Landmark, MessageCircle, Repeat2 } from 'lucide-react';
 import { applyFilters, brandStats, emptyFilters, useStore } from '../lib/store';
 import { BODY_TYPES, type BodyType, type Car } from '../lib/types';
 import { kmLabel, money, years } from '../lib/format';
@@ -18,6 +18,7 @@ export function Home() {
   const brands = useMemo(() => brandStats(publicCars), [publicCars]);
   const featured = useMemo(() => publicCars.filter((c) => c.featured && c.status === 'disponivel'), [publicCars]);
   const latest = useMemo(() => applyFilters(publicCars, emptyFilters).slice(0, 6), [publicCars]);
+  const bodies = BODY_TYPES.filter((b) => publicCars.some((c) => c.body === b));
   const goBrand = (b: string) => {
     setFilters({ ...emptyFilters, brands: [b] });
     navigate({ name: 'estoque' });
@@ -44,12 +45,13 @@ export function Home() {
         <BrandMarquee brands={brands} onPick={goBrand} />
       </section>
 
-      {featured.length > 0 && <FeaturedRow cars={featured} />}
+      {featured.length > 1 && <FeaturedRow cars={featured} />}
 
+      {bodies.length > 1 && (
       <section className="wrap pt-16" aria-label="Categorias">
         <SectionHead eyebrow="por categoria" title="O carro certo para a sua rotina" />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          {BODY_TYPES.map((b) => {
+        <div className={`grid grid-cols-2 gap-3 md:gap-4 ${bodies.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
+          {bodies.map((b) => {
             const count = publicCars.filter((c) => c.body === b).length;
             return (
               <button
@@ -71,18 +73,24 @@ export function Home() {
           })}
         </div>
       </section>
+      )}
 
       <section className="wrap pt-16" aria-label="Chegaram agora">
         <SectionHead
           eyebrow="chegaram agora"
-          title="Novidades no estoque"
+          title={publicCars.length === 1 ? 'Disponível agora' : 'Novidades no estoque'}
           action={
             <Link to={{ name: 'estoque' }} className="btn btn-outline" onClick={() => setFilters(emptyFilters)}>
-              Ver estoque completo ({publicCars.length}) <ArrowRight size={17} />
+              {publicCars.length === 1 ? 'Ver no estoque' : `Ver estoque completo (${publicCars.length})`} <ArrowRight size={17} />
             </Link>
           }
         />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {latest.length === 0 && (
+          <p className="rounded-[22px] border-2 border-dashed border-line px-6 py-12 text-center text-muted">
+            Estoque sendo atualizado. Chame a gente no WhatsApp para saber o que está chegando.
+          </p>
+        )}
+        <div className={`grid gap-4 ${latest.length === 1 ? 'max-w-sm' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
           {latest.map((c) => (
             <CarCard key={c.id} car={c} />
           ))}
@@ -96,7 +104,7 @@ export function Home() {
 }
 
 function Hero({ cars, featured, brandCount }: { cars: Car[]; featured: Car[]; brandCount: number }) {
-  const { setFilters } = useStore();
+  const { setFilters, settings } = useStore();
   const [brand, setBrand] = useState('');
   const [body, setBody] = useState('');
   const [max, setMax] = useState('');
@@ -120,7 +128,7 @@ function Hero({ cars, featured, brandCount }: { cars: Car[]; featured: Car[]; br
             Seu próximo carro <span className="text-brand">está aqui.</span>
           </h1>
           <p className="mt-5 max-w-[34rem] text-[17px] text-ink-muted">
-            {cars.length} carros revisados e com procedência. Escolha, simule a parcela e fale direto com a gente pelo WhatsApp.
+            {cars.length === 1 ? '1 carro disponível' : `${cars.length} carros disponíveis`} em {settings.city.replace(' · ', '-')}. Escolha, simule a parcela, consulte as condições e agende seu test drive pelo WhatsApp.
           </p>
 
           <form
@@ -159,19 +167,24 @@ function Hero({ cars, featured, brandCount }: { cars: Car[]; featured: Car[]; br
             </button>
           </form>
 
-          <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-            {[
-              [String(cars.length), 'carros no estoque'],
-              [String(brandCount), 'marcas'],
-              ['60x', 'para financiar'],
-            ].map(([v, l]) => (
-              <div key={l} className="flex items-baseline gap-2">
-                <dt className="sr-only">{l}</dt>
-                <dd className="price text-[28px] text-on-ink">{v}</dd>
-                <span className="tagline text-[13px] text-ink-muted">{l}</span>
-              </div>
+          <ul className="mt-8 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            <li className="flex items-baseline gap-2">
+              <span className="price text-[28px] text-on-ink">{cars.length}</span>
+              <span className="tagline text-[13px] text-ink-muted">{cars.length === 1 ? 'carro no estoque' : 'carros no estoque'}</span>
+            </li>
+            {brandCount > 1 && (
+              <li className="flex items-baseline gap-2">
+                <span className="price text-[28px] text-on-ink">{brandCount}</span>
+                <span className="tagline text-[13px] text-ink-muted">marcas</span>
+              </li>
+            )}
+            {['financiamento facilitado', 'seu usado na troca'].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <Check size={16} className="text-brand" strokeWidth={3} />
+                <span className="tagline text-[13px] text-ink-muted">{t}</span>
+              </li>
             ))}
-          </dl>
+          </ul>
         </div>
         {featured.length > 0 && <Showcase cars={featured} />}
       </div>
@@ -218,6 +231,7 @@ function Showcase({ cars }: { cars: Car[] }) {
             <p className="price text-[26px] leading-none">{money(car.price)}</p>
           </div>
         </div>
+        {cars.length > 1 && (
         <div className="flex items-center gap-2 border-t border-line px-5 py-3">
           <div className="flex flex-1 gap-1.5" role="tablist" aria-label="Escolher destaque">
             {cars.map((c, n) => (
@@ -238,6 +252,7 @@ function Showcase({ cars }: { cars: Car[] }) {
             <ChevronRight size={20} />
           </button>
         </div>
+        )}
       </div>
     </div>
   );
@@ -277,10 +292,10 @@ function FeaturedRow({ cars }: { cars: Car[] }) {
 
 function Benefits() {
   const items = [
-    { icon: ShieldCheck, title: 'Procedência conferida', text: 'Laudo cautelar aprovado e histórico verificado antes de entrar no estoque.' },
-    { icon: Repeat2, title: 'Seu usado na troca', text: 'Avaliamos seu carro pelo WhatsApp e usamos o valor como entrada.' },
-    { icon: Landmark, title: 'Financiamento em até 60x', text: 'Simule a parcela na página do carro e receba a aprovação rápida.' },
-    { icon: MessageCircle, title: 'Atendimento direto', text: 'Fale com um vendedor pelo WhatsApp, sem formulário e sem espera.' },
+    { icon: Landmark, title: 'Financiamento facilitado', text: 'Ótimas condições. Simule a parcela na página do carro e consulte pelo WhatsApp.' },
+    { icon: Repeat2, title: 'Seu usado na troca', text: 'Aceitamos seu carro como parte do pagamento, mediante avaliação.' },
+    { icon: CalendarCheck, title: 'Test drive', text: 'Gostou de um carro? Agende o test drive direto pelo WhatsApp.' },
+    { icon: MessageCircle, title: 'Atendimento direto', text: 'Fale com a gente pelo WhatsApp e consulte as condições na hora.' },
   ];
   return (
     <section className="wrap pt-20" aria-label="Por que comprar na Passos">
@@ -305,10 +320,10 @@ function SellBanner() {
       <div className="relative overflow-hidden rounded-[28px] bg-brand px-6 py-10 text-on-brand md:px-12 md:py-14">
         <Logo variant="outline" orange="#333333" className="pointer-events-none absolute -bottom-16 -right-10 w-[460px] opacity-[0.16]" title="" />
         <div className="relative max-w-xl">
-          <p className="tagline text-[14px]">vender ou trocar</p>
+          <p className="tagline text-[14px]">seu usado na troca</p>
           <h2 className="display mt-2 text-[clamp(1.9rem,4.4vw,3.2rem)]">Quanto vale o seu carro?</h2>
           <p className="mt-3 text-[16px] font-medium">
-            Mande os dados pelo site e receba a avaliação pelo WhatsApp. Se quiser trocar, o valor entra como parte do pagamento.
+            Aceitamos seu usado na troca, mediante avaliação. Mande os dados pelo site e continue a conversa pelo WhatsApp.
           </p>
           <Link to={{ name: 'vender' }} className="btn btn-ink btn-lg mt-6">
             Avaliar meu carro <ArrowRight size={18} />

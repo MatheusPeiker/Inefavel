@@ -28,7 +28,7 @@ export function Compare() {
     { label: 'Combustível', value: (c) => c.fuel },
     { label: 'Carroceria', value: (c) => c.body },
     { label: 'Cor', value: (c) => c.color },
-    { label: 'Itens de série e procedência', value: (c) => `${c.features.length} itens`, best: (l) => pick(l, (c) => -c.features.length) },
+    { label: 'Itens e equipamentos', value: (c) => `${c.features.length} itens`, best: (l) => pick(l, (c) => -c.features.length) },
   ];
 
   return (
